@@ -1,0 +1,13 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/winter/Documents/R_Projects/GGF-Conservatism/log/2023.01.22
+> -19.53.39.log.txt
+  log type:  text
+ opened on:  22 Jan 2023, 19:53:39
+. log of
+      name:  <unnamed>
+       log:  /Users/winter/Documents/R_Projects/GGF-Conservatism/log/2023.01.22
+> -19.53.39.log.txt
+  log type:  text
+ paused on:  22 Jan 2023, 19:53:39
+-------------------------------------------------------------------------------

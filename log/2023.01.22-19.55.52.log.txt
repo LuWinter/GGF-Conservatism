@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/winter/Documents/R_Projects/GGF-Conservatism/log/2023.01.22
+> -19.55.52.log.txt
+  log type:  text
+ opened on:  22 Jan 2023, 19:55:52
+. /*RSTATA: cut me here*/
+. } /* end capture noisily */
+
+. exit, clear STATA
