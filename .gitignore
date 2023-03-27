@@ -13,3 +13,5 @@ processed/
 # Other files to ignore
 ## 1. Old project
 GGF-Conservatism-back/
+## 2. Paper manuscripts (before accepted)
+doc/
