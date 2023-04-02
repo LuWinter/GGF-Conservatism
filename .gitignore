@@ -6,12 +6,13 @@
 .virtual_documents
 
 # Data and temp files to ignore
-data/
+/data/
 temp/
-processed/
+/processed/
+/log/data/
 
 # Other files to ignore
 ## 1. Old project
-GGF-Conservatism-back/
+/GGF-Conservatism-back/
 ## 2. Paper manuscripts (before accepted)
-doc/
+/doc/
