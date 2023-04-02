@@ -9,6 +9,10 @@
 *********************************************************/
 
 // PREPROCESS ----------------------------------------------------------------
+// Use Log File
+global file_name "05_further-analysis"
+do "code/_stata-log.do"
+
 // Read main data
 use "processed/intermediate/main_data.dta", clear
 

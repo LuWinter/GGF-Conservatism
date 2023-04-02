@@ -4,8 +4,11 @@
 * TASK: This script generates the table of the description statistics
 *********************************************************/
 
-
 // PREPROCESS ----------------------------------------------------------------
+// Use Log File
+global file_name "02_description-statistics"
+do "code/_stata-log.do"
+
 // Read main-data
 use "processed/intermediate/main_data.dta", clear
 
