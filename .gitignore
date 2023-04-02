@@ -7,9 +7,9 @@
 
 # Data and temp files to ignore
 /data/
-temp/
 /processed/
 /log/data/
+**/temp/
 
 # Other files to ignore
 ## 1. Old project
