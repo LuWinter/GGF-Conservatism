@@ -8,6 +8,7 @@
 # PACKAGES ----------------------------------------------------------------
 pacman::p_load(echarts4r)
 pacman::p_load(htmlwidgets)
+pacman::p_load(here)
 
 
 # 1. Prepare Data ---------------------------------------------------------
