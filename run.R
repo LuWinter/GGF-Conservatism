@@ -39,6 +39,9 @@ pacman::p_load(RStata)
 pacman::p_load(rio)
 pacman::p_load(fs)
 
+## Load user defined functions
+source("code/_utils.R")
+
 ## Project root
 i_am(path = "run.R")
 
@@ -71,11 +74,16 @@ rio::export(x = main_data, file = here("processed", "intermediate", "main_data.d
 
 
 # 4. Run Analysis ---------------------------------------------------------
-source(here("code", "01_GGF-statistics.R"), local = new.env())
-stata(here("code", "02_description-statistics.do"))
-stata(here("code", "03_basic-analysis.do"))
-stata(here("code", "04_mechanism-analysis.do"))
-stata(here("code", "05_further-analysis.do"))
+# source(here("code", "01_GGF-statistics.R"), local = new.env())
+# stata(here("code", "02_description-statistics.do"))
+# stata(here("code", "03_basic-analysis.do"))
+# stata(here("code", "04_mechanism-analysis.do"))
+# stata(here("code", "05_further-analysis.do"))
+run_script(path = "code/01_GGF-statistics.R")
+run_script(path = "code/02_description-statistics.do")
+run_script(path = "code/03_basic-analysis.do")
+run_script(path = "code/04_mechanism-analysis.do")
+run_script(path = "code/05_further-analysis.do")
 
 
 ### EOF
