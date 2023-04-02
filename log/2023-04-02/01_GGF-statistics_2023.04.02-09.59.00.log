@@ -1,0 +1,40 @@
+
+R version 4.2.0 (2022-04-22) -- "Vigorous Calisthenics"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Running ~/.Rprofile...
+
+> 
+> #########################################################
+> # SCRIPT: 01_GGF_statistics.R
+> # TASK: This script generates the statistical figures of GGF
+> #########################################################
+> 
+> 
+> # PACKAGES ----------------------------------------------------------------
+> pacman::p_load(echarts4r)
+> pacman::p_load(htmlwidgets)
+> 
+> 
+> # 1. Prepare Data ---------------------------------------------------------
+> ## Merged sample of GGF and listed company shareholders
+> Big10SH_GGF_nodupl <- readRDS(here("processed", "Big10SH-GGF_nodupl_20221001.rds"))
+Error in here("processed", "Big10SH-GGF_nodupl_20221001.rds") : 
+  could not find function "here"
+Calls: readRDS
+Execution halted

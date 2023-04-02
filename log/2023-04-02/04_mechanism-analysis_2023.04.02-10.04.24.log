@@ -1,0 +1,439 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/winter/Documents/R_Projects/GGF-Conservatism/log/2023-04-02
+> /04_mechanism-analysis_2023.04.02-10.04.24.log
+  log type:  text
+ opened on:   2 Apr 2023, 10:04:24
+
+. 
+end of do-file
+. 
+. // Read main-data
+. use "processed/intermediate/main_data.dta", clear
+. 
+. // Generate Variables
+. destring Stkcd, replace
+Stkcd: all characters numeric; replaced as long
+. xtset Stkcd Year
+
+Panel variable: Stkcd (unbalanced)
+ Time variable: Year, 2016 to 2020, but with gaps
+         Delta: 1 unit
+. 
+. egen Industry2 = group(Industry)
+. rename Industry Industry_str
+. rename Industry2 Industry
+. 
+. egen Province2 = group(Province)
+. rename Province Province_str
+. rename Province2 Province
+. 
+. // Winsorize Sample
+. winsor2 Size Lev MHRatio RDRatio GDP_p INS Age SuperINS, cuts(1 99) by(Year) 
+> trim replace
+. 
+. // Control Variable Macros
+. global base_reg "DR Ret DR#c.Ret"
+. global GGF_reg "GGF GGF#DR GGF#c.Ret GGF#DR#c.Ret"
+. global Size_reg "Size c.Size#DR c.Size#c.Ret c.Size#DR#c.Ret"
+. global MB_reg "MB c.MB#DR c.MB#c.Ret c.MB#DR#c.Ret"
+. global Lev_reg "Lev c.Lev#DR c.Lev#c.Ret c.Lev#DR#c.Ret"
+. global Big4_reg "Big4 Big4#DR Big4#c.Ret Big4#DR#c.Ret"
+. global SOE_reg "SOE SOE#DR SOE#c.Ret SOE#DR#c.Ret"
+. global GDP_reg "GDP_p c.GDP_p#DR c.GDP_p#c.Ret c.GDP_p#DR#c.Ret"
+. global SuperINS_reg "SuperINS c.SuperINS#DR c.SuperINS#c.Ret c.SuperINS#DR#c.
+> Ret"
+. global MHRatio_reg "MHRatio c.MHRatio#DR c.MHRatio#c.Ret c.MHRatio#DR#c.Ret"
+. global Age_reg "Age c.Age#DR c.Age#c.Ret c.Age#DR#c.Ret"
+. 
+. // Fixed Effect Macros
+. global common_fe "i.Year i.Industry i.Province"
+. global high_fe "i.Year#i.Industry i.Year#i.Province"
+. 
+. 
+. // Director Dispatch Analysis -----------------------------------------------
+> -
+. // Group-Yes Common Regression
+. #delimit ;
+delimiter now ;
+. eststo dd_yes_common:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg 
+>     if Related > 0 | GGF == 0, 
+>         absorb($common_fe)   
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-Yes Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo dd_yes_robust:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg 
+>         $Size_reg $Lev_reg $MHRatio_reg $Age_reg $GDP_reg
+>     if Related > 0 | GGF == 0, 
+>         absorb($common_fe $high_fe)   
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. // Group-No Common Regression
+. #delimit ;
+delimiter now ;
+. eststo dd_no_common:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg 
+>     if Related == 0 | GGF == 0, 
+>         absorb($common_fe)   
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-No Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo dd_no_robust:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg 
+>         $Size_reg $Lev_reg $MHRatio_reg $Age_reg $GDP_reg
+>     if Related == 0 | GGF == 0, 
+>         absorb($common_fe $high_fe)   
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. 
+. // Over Investment Analysis -------------------------------------------------
+> -
+. // Group-Low Common Regression
+. #delimit ;
+delimiter now ;
+. eststo oi_low_common:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg   
+>     if OverInvest < 0 & OverInvest != .,                                
+>         absorb($common_fe)              
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-Low Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo oi_low_robust:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg        
+>         $Size_reg $Lev_reg $MHRatio_reg $Age_reg $GDP_reg 
+>     if OverInvest < 0 & OverInvest != .,                                
+>         absorb($common_fe $high_fe)             
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. // Group-High Common Regression
+. #delimit ;
+delimiter now ;
+. eststo oi_high_common:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg 
+>     if OverInvest > 0 & OverInvest != .,                                
+>         absorb($common_fe)
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-High Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo oi_high_robust:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg        
+>         $Size_reg $Lev_reg $MHRatio_reg $Age_reg $GDP_reg 
+>     if OverInvest > 0 & OverInvest != .,                                
+>         absorb($common_fe $high_fe)     
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. 
+. // Corporate Strategy Analysis ----------------------------------------------
+> -
+. // Generate Groups
+. egen ss_p50 = pctile(StrategyScore), p(66)
+. gen ss_d = 1 if StrategyScore > 21 & StrategyScore != .
+(9,097 missing values generated)
+. replace ss_d = 0 if StrategyScore <= 21
+(4,881 real changes made)
+. 
+. // Group-High Common Regression
+. #delimit ;
+delimiter now ;
+. eststo cs_high_common:                                
+>         reghdfe EPS_P $base_reg $GGF_reg        
+>     if ss_d == 1,                               
+>         absorb($common_fe)                                      
+>     ;
+(MWFE estimator converged in 7 iterations)
+note: 1.GGF#0b.DR omitted because of collinearity
+note: 1.GGF#1.DR omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =      1,730
+Absorbing 3 HDFE groups                           F(   7,   1675) =       9.23
+                                                  Prob > F        =     0.0000
+                                                  R-squared       =     0.0783
+                                                  Adj R-squared   =     0.0486
+                                                  Within R-sq.    =     0.0371
+                                                  Root MSE        =     0.1345
+
+------------------------------------------------------------------------------
+       EPS_P | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          DR |   .0180407   .0515451     0.35   0.726    -.0830589    .1191404
+         Ret |   .0235761   .0093204     2.53   0.012     .0052953    .0418569
+             |
+    DR#c.Ret |
+          1  |   .1095915   .0279848     3.92   0.000     .0547026    .1644804
+             |
+         GGF |    .061075   .0377005     1.62   0.105      -.01287      .13502
+             |
+      GGF#DR |
+        0 1  |  -.0027973   .0526207    -0.05   0.958    -.1060067     .100412
+        1 0  |          0  (omitted)
+        1 1  |          0  (omitted)
+             |
+   GGF#c.Ret |
+          1  |  -.0299156   .0915497    -0.33   0.744    -.2094795    .1496484
+             |
+GGF#DR#c.Ret |
+        1 1  |   .2710185   .1519047     1.78   0.075    -.0269246    .5689615
+             |
+       _cons |   .0173059    .006976     2.48   0.013     .0036233    .0309884
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+        Year |         5           0           5     |
+    Industry |        14           1          13     |
+    Province |        31           1          30    ?|
+-----------------------------------------------------+
+? = number of redundant parameters may be higher
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-High Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo cs_high_robust:
+>         quietly reghdfe EPS_P $base_reg $GGF_reg        
+>         $Size_reg $SuperINS_reg $MHRatio_reg $Age_reg $GDP_reg  
+>     if ss_d == 1,                               
+>         absorb($common_fe $high_fe)                     
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. // Group-Low Common Regression
+. #delimit ;
+delimiter now ;
+. eststo cs_low_common:   
+>         reghdfe EPS_P $base_reg $GGF_reg 
+>     if ss_d == 0,                               
+>         absorb($common_fe)                                
+>     ;
+(MWFE estimator converged in 6 iterations)
+note: 1.GGF#0b.DR omitted because of collinearity
+note: 1.GGF#1.DR omitted because of collinearity
+
+HDFE Linear regression                            Number of obs   =      4,881
+Absorbing 3 HDFE groups                           F(   7,   4826) =      54.11
+                                                  Prob > F        =     0.0000
+                                                  R-squared       =     0.1181
+                                                  Adj R-squared   =     0.1082
+                                                  Within R-sq.    =     0.0728
+                                                  Root MSE        =     0.1009
+
+------------------------------------------------------------------------------
+       EPS_P | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+          DR |   .0025756   .0273371     0.09   0.925    -.0510175    .0561688
+         Ret |    .024958   .0048993     5.09   0.000     .0153532    .0345628
+             |
+    DR#c.Ret |
+          1  |   .1551731    .013567    11.44   0.000     .1285756    .1817707
+             |
+         GGF |   .0135119   .0163034     0.83   0.407    -.0184502    .0454739
+             |
+      GGF#DR |
+        0 1  |   .0082227   .0277223     0.30   0.767    -.0461257    .0625712
+        1 0  |          0  (omitted)
+        1 1  |          0  (omitted)
+             |
+   GGF#c.Ret |
+          1  |  -.0230538   .0157383    -1.46   0.143    -.0539081    .0078005
+             |
+GGF#DR#c.Ret |
+        1 1  |   .0326655   .0865834     0.38   0.706    -.1370774    .2024084
+             |
+       _cons |   .0336541   .0030383    11.08   0.000     .0276977    .0396105
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Redundant  = Num. Coefs |
+-------------+---------------------------------------|
+        Year |         5           0           5     |
+    Industry |        14           1          13     |
+    Province |        31           1          30    ?|
+-----------------------------------------------------+
+? = number of redundant parameters may be higher
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "NO", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "NO", replace
+. quietly estadd local fe_prov_year "NO", replace
+. 
+. // Group-Low Robust Regression
+. #delimit ;
+delimiter now ;
+. eststo cs_low_robust:                         
+>         quietly reghdfe EPS_P $base_reg $GGF_reg        
+>         $Size_reg $SuperINS_reg $MHRatio_reg $Age_reg $GDP_reg
+>     if ss_d == 0,                               
+>         absorb($common_fe $high_fe)                     
+>     ;
+. #delimit cr
+delimiter now cr
+. quietly estadd local control "YES", replace
+. quietly estadd local fe_industry "YES", replace
+. quietly estadd local fe_year "YES", replace
+. quietly estadd local fe_province "YES", replace
+. quietly estadd local fe_indu_year "YES", replace
+. quietly estadd local fe_prov_year "YES", replace
+. 
+. 
+. // SAVE RESULTS -------------------------------------------------------------
+> -
+. // Filepath for tables
+. global table_path "results/tables"
+. 
+. // Varis List Macros
+. global var_list "_cons DR Ret 1.DR#c.Ret GGF 0.GGF#1.DR 1.GGF#c.Ret 1.GGF#1.D
+> R#c.Ret"
+. 
+. // Save Director Dispatch Regression
+. #delimit ;           
+delimiter now ;
+. esttab dd_yes_common dd_yes_robust dd_no_common dd_no_robust              
+>     using "$table_path/04_director-dispatch-regression.rtf", 
+>         replace label nogap star(* 0.10 ** 0.05 *** 0.01) 
+>     keep($var_list) varwidth(15) b t(4) ar2(4) 
+>         s(control fe_industry fe_year fe_province fe_indu_year fe_prov_year N
+>  r2_a, 
+>           label("Control Variables" "Industry FE" "Year FE" "Province FE" 
+>                         "Industry ✖ Year FE" "Province ✖ Year FE" "Obs" "adju
+> sted-R2"))     
+>     mtitle("Group-Yes" "Group-Yes Robust" "Group-No" "Group-No Robust");
+(output written to results/tables/04_director-dispatch-regression.rtf)
+. #delimit cr
+delimiter now cr
+. 
+. // Save Over Investment Regression
+. #delimit ;
+delimiter now ;
+. esttab oi_high_common oi_high_robust oi_low_common oi_low_robust
+>     using "$table_path/05_over-investment-regression.rtf",                   
+>  
+>     replace label nogap star(* 0.10 ** 0.05 *** 0.01) 
+>         keep($var_list) varwidth(15) b t(4) ar2(4) 
+>         s(control fe_industry fe_year fe_province fe_indu_year fe_prov_year N
+>  r2_a, 
+>           label("Control Variables" "Industry FE" "Year FE" "Province FE" 
+>                         "Industry ✖ Year FE" "Province ✖ Year FE" "Obs" "adju
+> sted-R2"))             
+>     mtitle("Group-High" "Group-High Robust" "Group-Low" "Group-Low Robust");
+(output written to results/tables/05_over-investment-regression.rtf)
+. #delimit cr
+delimiter now cr
+. 
+. // Save Corporate Strategy Regression
+. #delimit ;         
+delimiter now ;
+. esttab cs_high_common cs_high_robust cs_low_common cs_low_robust        
+>     using "$table_path/06_corporarte-strategy-regression.rtf",               
+>                    
+>     replace label nogap star(* 0.10 ** 0.05 *** 0.01) 
+>         keep($var_list) varwidth(15) b t(4) ar2(4) 
+>         s(control fe_industry fe_year fe_province fe_indu_year fe_prov_year N
+>  r2_a, 
+>           label("Control Variables" "Industry FE" "Year FE" "Province FE" 
+>                         "Industry ✖ Year FE" "Province ✖ Year FE" "Obs" "adju
+> sted-R2"))
+>     mtitle("Group-High" "Group-High Robust" "Group-Low" "Group-Low Robust");
+(output written to results/tables/06_corporarte-strategy-regression.rtf)
+. #delimit cr     
+delimiter now cr
+. 
+. 
+. *** EOF
+. /*RSTATA: cut me here*/
+. } /* end capture noisily */
+
+. exit, clear STATA
